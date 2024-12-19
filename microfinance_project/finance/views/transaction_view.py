@@ -1,0 +1,53 @@
+from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from ..models import User, Savings, Transaction
+from decimal import Decimal
+from ..serializers import UserSerializer, SavingsSerializer, TransactionSerializer
+
+# Transaction ViewSet
+class TransactionView(APIView):
+    def get(self, request, user_id=None):
+        """
+        Retrieve transactions for a specific user if `user_id` is provided.
+        Otherwise, return all transactions.
+        """
+        if user_id:
+            try:
+                # Fetch transactions for the given user ID
+                transactions = Transaction.objects.filter(user_id=user_id)
+                if not transactions.exists():
+                    return Response(
+                        {'error': 'No transactions found for the given user.'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+
+                serializer = TransactionSerializer(transactions, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            except ValueError:
+                return Response(
+                    {'error': 'Invalid user ID. It must be a number.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Fetch all transactions
+        transactions = Transaction.objects.all()
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        """
+        Create a new transaction record.
+        """
+        serializer = TransactionSerializer(data=request.data)
+        if serializer.is_valid():
+            transaction = serializer.save()
+
+            # Optionally, you can implement custom logic here
+            # e.g., updating the user's savings balance based on the transaction type
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

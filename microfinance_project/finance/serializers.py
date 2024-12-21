@@ -1,11 +1,18 @@
 from rest_framework import serializers
-from .models import User, Savings, Transaction
+from .models import CustomUser, Savings, Transaction
 
-# user serializer
+# CustomUser serializer
 class UserSerializer( serializers.ModelSerializer):
+    password_alt = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+        return CustomUser.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+        )
     class Meta:
-        model = User
-        fields = '__all__'
+        model = CustomUser
+        fields = ( "id", "username", "password", )
 
 # Savings serializer
 class SavingsSerializer( serializers.ModelSerializer):
@@ -13,7 +20,7 @@ class SavingsSerializer( serializers.ModelSerializer):
         model = Savings
         fields = '__all__'
 
-# user serializer
+# Transaction serializer
 class TransactionSerializer( serializers.ModelSerializer):
     class Meta:
         model = Transaction

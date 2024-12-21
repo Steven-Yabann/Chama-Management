@@ -2,9 +2,9 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import User, Savings, Transaction
-from decimal import Decimal
+from ..models import Savings, Transaction
 from ..serializers import UserSerializer, SavingsSerializer, TransactionSerializer
+from ..services.transactions_services import deposit_to_savings, create_transaction
 
 # Transaction ViewSet
 class TransactionView(APIView):
@@ -38,15 +38,19 @@ class TransactionView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        """
-        Create a new transaction record.
-        """
         serializer = TransactionSerializer(data=request.data)
         if serializer.is_valid():
-            transaction = serializer.save()
+            transaction_type = serializer.validated_data.get("transaction_type")
+            amount = serializer.validated_data.get("amount")
+            user_id = serializer.validated_data.get("user_id")
 
-            # Optionally, you can implement custom logic here
-            # e.g., updating the user's savings balance based on the transaction type
+            if transaction_type == "deposit":
+                try:
+                    # Use the service to handle deposit and savings update
+                    savings = deposit_to_savings(user_id, amount)
+                    create_transaction(user_id, amount, "deposit")
+                except ValueError as e:
+                    return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 

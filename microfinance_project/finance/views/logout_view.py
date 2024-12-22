@@ -7,10 +7,6 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 
 
-class LogoutView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
+class LogoutView(APIView):  
     def post(self, request):
-        request.auth.delete()  # Delete the token
         return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)

@@ -9,7 +9,5 @@ class RegisterView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token, created = Token.objects.get_or_create(user=user)
-            print(token.key)
-            return Response({'token': token.key, 'username': user.username}, status=status.HTTP_201_CREATED)
-        return Response({"error": "Failed Registration"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "User registered successfully", "username": user.username},status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

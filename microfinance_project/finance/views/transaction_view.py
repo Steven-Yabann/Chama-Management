@@ -42,13 +42,11 @@ class TransactionView(APIView):
         if serializer.is_valid():
             transaction_type = serializer.validated_data.get("transaction_type")
             amount = serializer.validated_data.get("amount")
-            user_id = serializer.validated_data.get("user_id")
-
+            user = serializer.validated_data.get("user")
+            print(user, amount, transaction_type)
             if transaction_type == "deposit":
                 try:
-                    # Use the service to handle deposit and savings update
-                    savings = deposit_to_savings(user_id, amount)
-                    create_transaction(user_id, amount, "deposit")
+                    create_transaction(user, amount, "deposit")
                 except ValueError as e:
                     return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
 

@@ -4,7 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import Savings, Transaction
 from decimal import Decimal
-from ..serializers import UserSerializer, SavingsSerializer, TransactionSerializer
+from ..serializers import SavingsSerializer
+from ..services.transactions_services import create_transaction
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Saving ViewSet
 class SavingView(APIView):
@@ -13,6 +16,8 @@ class SavingView(APIView):
         Fetch savings for a specific user if `user_id` is provided.
         Otherwise, fetch all savings records.
         """
+        authentication_classes = [JWTAuthentication]
+        permission_classes = [IsAuthenticated]
         if user_id:
             try:
                 # Fetch savings records for a specific user
@@ -50,14 +55,26 @@ class SavingView(APIView):
             savings = Savings.objects.get(user_id=user_id)
 
             # Validate the input amount
-            amount = request.data.get('amount_saved')
-            if not amount or float(amount) <= 0:
+            amount_str = request.data.get('amount_saved')
+
+            if not amount_str:
+                return Response({'error': 'Amount is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                # Convert amount to Decimal
+                amount = Decimal(amount_str.strip())  # Strip any leading/trailing whitespace
+            except (ValueError, TypeError):
+                return Response({'error': 'Invalid input. Amount must be a number.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if amount <= 0:
                 return Response({'error': 'Invalid amount. Must be a positive number.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Update the savings amount
-            savings.amount_saved += Decimal(amount)
+            savings.amount_saved += amount
+            transaction_type = request.data.get('transaction_type')
+            create_transaction(user_id, amount, transaction_type)  # Call to create transaction
             savings.save()
-            
+
             # Serialize and return the updated savings record
             serializer = SavingsSerializer(savings)
             return Response(serializer.data, status=status.HTTP_200_OK)

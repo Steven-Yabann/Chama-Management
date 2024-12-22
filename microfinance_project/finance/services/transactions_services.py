@@ -1,5 +1,5 @@
 from decimal import Decimal
-from ..models import Savings, Transaction
+from ..models import Savings, Transaction, User
 
 def deposit_to_savings(user_id, amount):
     try:
@@ -11,6 +11,17 @@ def deposit_to_savings(user_id, amount):
         raise ValueError("Savings record not found for this user.")
 
 def create_transaction(user_id, amount, transaction_type):
+    # Fetch the User instance based on the user_id
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        raise ValueError("User does not exist")
+    
+    # Convert amount to Decimal if necessary
+    amount_decimal = Decimal(amount)
+    print(f'user is {user} , amount is {amount_decimal} and transaction type is {transaction_type}')
+    
+    # Create the transaction object
     return Transaction.objects.create(
-        user_id=user_id, amount=amount, transaction_type=transaction_type
+        user=user, amount=amount_decimal, transaction_type=transaction_type
     )

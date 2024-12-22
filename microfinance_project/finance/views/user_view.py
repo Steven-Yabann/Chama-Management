@@ -2,8 +2,10 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import User, Savings, Transaction
-from ..serializers import UserSerializer, SavingsSerializer, TransactionSerializer
+from ..models import User
+from ..serializers import UserSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class UserView(APIView):
     def get(self, request, id=None):
@@ -11,6 +13,9 @@ class UserView(APIView):
         Fetch a single user if `id` is provided.
         Otherwise, fetch all users.
         """
+        # authentication_classes = [JWTAuthentication]
+        # permission_classes = [IsAuthenticated]
+        
         if id:
             try:
                 # Fetch a single user
@@ -27,19 +32,19 @@ class UserView(APIView):
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        """
-        Create a new user.
-        """
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            username = serializer.validated_data.get("username")
-            password = serializer.validated_data.get("password")
-            user_type = serializer.validated_data.get("user_type")
+    # def post(self, request):
+    #     """
+    #     Create a new user.
+    #     """
+    #     serializer = UserSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         username = serializer.validated_data.get("username")
+    #         password = serializer.validated_data.get("password")
+    #         user_type = serializer.validated_data.get("user_type")
             
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

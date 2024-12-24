@@ -26,7 +26,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create user with required fields
         user = User.objects.create(
-            username=validated_data['email'],
+            username=validated_data['username'],
             user_type=validated_data['user_type'],
             email=validated_data['email'],
             first_name=validated_data['first_name'],

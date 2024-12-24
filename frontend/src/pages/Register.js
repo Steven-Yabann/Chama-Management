@@ -20,7 +20,15 @@ const Register = () => {
             const response = await axios.post('http://127.0.0.1:8000/api/auth/register/', formData);
             navigate('/');
         } catch (error) {
-            console.error("Registration failed:", error);
+            if (error.response) {
+                // Log the detailed errors sent from the backend
+                console.error('Registration failed:', error.response.data);
+    
+                // Optionally, show specific errors to the user
+                alert(`Registration failed: ${JSON.stringify(error.response.data)}`);
+            } else {
+                console.error('An unexpected error occurred:', error.message);
+            }
         }
     }
 
@@ -54,6 +62,17 @@ const Register = () => {
                                         className="form-control"
                                         name="last_name"
                                         placeholder="Enter your last name"
+                                        value={formData.last_name}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label">Username</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        name="username"
+                                        placeholder="Enter your username"
                                         value={formData.last_name}
                                         onChange={handleChange}
                                     />

@@ -1,11 +1,11 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 from .views.user_view import UserView
 from .views.transaction_view import TransactionView
 from .views.savings_view import SavingView
 from .views.login_view import LoginView
 from .views.register_view import RegisterView
 from .views.logout_view import LogoutView
+from .views.groups_view import CreateGroupView, JoinGroupView, GroupMembersView, GroupDetailsView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
@@ -24,5 +24,10 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     
     path('auth/token/', TokenObtainPairView.as_view(), name='Token_obtain_pair'),
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='Token_refresh_view')
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='Token_refresh_view'),
+
+    path('groups/create/', CreateGroupView.as_view(), name='create_group'),
+    path('groups/join/', JoinGroupView.as_view(), name='join_group'),
+    path('groups/<int:group_id>/members/', GroupMembersView.as_view(), name='group_members'),
+    path('groups/<int:group_id>/details/', GroupDetailsView.as_view(), name='group_details'),
 ]

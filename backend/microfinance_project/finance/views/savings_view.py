@@ -5,7 +5,7 @@ from rest_framework import status
 from ..models import Savings, Transaction
 from decimal import Decimal
 from ..serializers import SavingsSerializer
-from ..services.transactions_services import create_transaction
+from ..services.services import create_transaction
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -55,7 +55,7 @@ class SavingView(APIView):
             savings = Savings.objects.get(user_id=user_id)
 
             # Validate the input amount
-            amount_str = request.data.get('amount_saved')
+            amount_str = request.data.get('amount')
 
             if not amount_str:
                 return Response({'error': 'Amount is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -70,9 +70,10 @@ class SavingView(APIView):
                 return Response({'error': 'Invalid amount. Must be a positive number.'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Update the savings amount
-            savings.amount_saved += amount
+            savings.amount += amount
+            group_id = request.data.get('group_id')
             transaction_type = request.data.get('transaction_type')
-            create_transaction(user_id, amount, transaction_type)  # Call to create transaction
+            create_transaction(user_id, amount, transaction_type, group_id)  # Call to create transaction
             savings.save()
 
             # Serialize and return the updated savings record

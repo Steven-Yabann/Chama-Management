@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Savings, Transaction
+from .models import User, Savings, Transaction, GroupMember, ChamaGroup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 
@@ -41,14 +41,29 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
-# Savings serializer
-class SavingsSerializer( serializers.ModelSerializer):
+
+class ChamaGroupSerializer(serializers.ModelSerializer):
+    group_members = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = ChamaGroup
+        fields = ('id', 'name', 'description', 'admin', 'group_code', 'group_members')
+        read_only_fields = ['group_code']
+
+
+class GroupMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupMember
+        fields = ('id', 'user', 'group', 'joined_at')
+
+
+class SavingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Savings
-        fields = '__all__'
+        fields = ('id', 'amount', 'saved_at', 'group', 'user')
 
-# Transaction serializer
-class TransactionSerializer( serializers.ModelSerializer):
+
+class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
-        fields = '__all__'
+        fields = ('id', 'transaction_type', 'amount', 'created_at', 'group', 'user')

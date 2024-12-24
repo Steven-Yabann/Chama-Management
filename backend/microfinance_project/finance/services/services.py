@@ -10,7 +10,7 @@ def deposit_to_savings(user_id, amount):
     except Savings.DoesNotExist:
         raise ValueError("Savings record not found for this user.")
 
-def create_transaction(user_id, amount, transaction_type):
+def create_transaction(user_id, amount, transaction_type, group_id):
     # Fetch the User instance based on the user_id
     try:
         user = User.objects.get(id=user_id)
@@ -23,5 +23,5 @@ def create_transaction(user_id, amount, transaction_type):
     
     # Create the transaction object
     return Transaction.objects.create(
-        user=user, amount=amount_decimal, transaction_type=transaction_type
+        user=user, amount=amount_decimal, transaction_type=transaction_type, group_id=group_id
     )

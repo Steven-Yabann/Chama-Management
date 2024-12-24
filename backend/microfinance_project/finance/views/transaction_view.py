@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from ..models import Savings, Transaction
 from ..serializers import UserSerializer, SavingsSerializer, TransactionSerializer
-from ..services.transactions_services import deposit_to_savings, create_transaction
+from ..services.services import deposit_to_savings, create_transaction
 
 # Transaction ViewSet
 class TransactionView(APIView):

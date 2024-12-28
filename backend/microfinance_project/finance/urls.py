@@ -5,8 +5,9 @@ from .views.savings_view import SavingView
 from .views.login_view import LoginView
 from .views.register_view import RegisterView
 from .views.logout_view import LogoutView
-from .views.groups_view import CreateGroupView, JoinGroupView, GroupMembersView, GroupDetailsView
+from .views.groups_view import CreateGroupView, JoinGroupView, GroupMembersView, GroupDetailsView, UserGroupsView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .serializers import CustomTokenObtainPairSerializer
 
 
 urlpatterns = [
@@ -23,11 +24,12 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     
-    path('auth/token/', TokenObtainPairView.as_view(), name='Token_obtain_pair'),
+    path('auth/token/', TokenObtainPairView.as_view(serializer_class=CustomTokenObtainPairSerializer), name='Token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='Token_refresh_view'),
 
     path('groups/create/', CreateGroupView.as_view(), name='create_group'),
     path('groups/join/', JoinGroupView.as_view(), name='join_group'),
     path('groups/<int:group_id>/members/', GroupMembersView.as_view(), name='group_members'),
     path('groups/<int:group_id>/details/', GroupDetailsView.as_view(), name='group_details'),
+    path('groups/user/', UserGroupsView.as_view(), name='user_groups'),
 ]

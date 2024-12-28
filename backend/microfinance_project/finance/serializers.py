@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import User, Savings, Transaction, GroupMember, ChamaGroup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -67,3 +68,16 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'transaction_type', 'amount', 'created_at', 'group', 'user')
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+    
+        # custom classes
+        token['id'] = user.id
+        token['username'] = user.username
+        token['email'] = user.email
+        token['user_type'] = user.user_type
+
+        return token

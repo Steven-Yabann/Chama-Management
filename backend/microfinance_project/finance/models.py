@@ -28,7 +28,7 @@ class ChamaGroup(models.Model):
     def save(self, *args, **kwargs):
         # Auto-generate group_code if not set
         if not self.group_code:
-            self.group_code = str(uuid.uuid4())[:8]  # Generate an 8-character unique code
+            self.group_code = str(uuid.uuid4())[:8]
         super().save(*args, **kwargs)
 
     def __str__(self):

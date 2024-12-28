@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..models import ChamaGroup, GroupMember
-from ..serializers import ChamaGroupSerializer, GroupMemberSerializer
+from ..models import ChamaGroup, GroupMember, Transaction, Savings
+from ..serializers import ChamaGroupSerializer, GroupMemberSerializer, TransactionSerializer, SavingsSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 
 class CreateGroupView(APIView):
     def post(self, request):
@@ -44,14 +45,67 @@ class GroupDetailsView(APIView):
 
     def get(self, request, group_id):
         try:
-            group = ChamaGroup.objects.get(id=group_id)
+            # Fetch the group
+            group = get_object_or_404(ChamaGroup, id=group_id)
 
             # Check if the user is a member or admin of the group
             if request.user not in group.group_members.all() and request.user != group.admin:
                 return Response({"error": "You do not have permission to view this group."}, status=status.HTTP_403_FORBIDDEN)
+            
             print(group)
             print(group.group_members)
-            serializer = ChamaGroupSerializer(group)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+            # serialize group details
+            group_serializer = ChamaGroupSerializer(group)
+
+            # fetch and serialize member details
+            members = GroupMember.objects.filter(group = group)
+            member_serializer = GroupMemberSerializer(members, many = True)
+
+            # fetch and serialize transaction
+            transactions = Transaction.objects.filter(user__in=group.group_members.all())
+            transaction_serializer = TransactionSerializer(transactions, many = True)
+
+            # Fetch and serialize savings
+            savings = Savings.objects.filter(user__in=group.group_members.all())
+            savings_serializer = SavingsSerializer(savings, many=True)
+
+            # combine data
+            response_data = {
+                "group_details": group_serializer.data,
+                "members": member_serializer.data,
+                "transactions": transaction_serializer.data,
+                "savings": savings_serializer.data,
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        
         except ChamaGroup.DoesNotExist:
             return Response({"error": "Group not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UserGroupsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Query ChamaGroup via the group_members ManyToMany relationship
+            groups = ChamaGroup.objects.filter(group_members=request.user)
+            
+            # Convert the groups into a list of dictionaries for the response
+            group_data = [{
+                'id': group.id,
+                'name': group.name,
+                'description': group.description,
+                'admin': group.admin.username,
+            } for group in groups]
+
+            if not group_data:
+                return Response({"error": "User is not a member of any chama"}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response(group_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # Catch any unexpected errors
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

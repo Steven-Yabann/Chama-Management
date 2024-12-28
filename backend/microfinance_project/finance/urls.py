@@ -29,7 +29,6 @@ urlpatterns = [
 
     path('groups/create/', CreateGroupView.as_view(), name='create_group'),
     path('groups/join/', JoinGroupView.as_view(), name='join_group'),
-    path('groups/<int:group_id>/members/', GroupMembersView.as_view(), name='group_members'),
     path('groups/<int:group_id>/details/', GroupDetailsView.as_view(), name='group_details'),
     path('groups/user/', UserGroupsView.as_view(), name='user_groups'),
 ]

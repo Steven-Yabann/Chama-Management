@@ -8,6 +8,7 @@ import CreateGroup from './pages/CreateGroup';
 import JoinGroup from './pages/JoinGroup';
 import GroupDetails from './pages/GroupDetails';
 import NavBar from './components/Navbar';
+import TransactionPage from './pages/TransactionPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/create-group" element={<CreateGroup />} />
           <Route path="/join-group" element={<JoinGroup />} />
           <Route path="/group/:groupId" element={<GroupDetails />} />
+          <Route path="/group/:groupId/transaction" element={<TransactionPage />} />
         </Routes>
       </div>
   );

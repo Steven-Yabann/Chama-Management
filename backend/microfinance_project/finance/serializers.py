@@ -45,7 +45,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ChamaGroupSerializer(serializers.ModelSerializer):
     group_members = serializers.StringRelatedField(many=True, read_only=True)
-
+    admin = UserSerializer()
     class Meta:
         model = ChamaGroup
         fields = ('id', 'name', 'description', 'admin', 'group_code', 'group_members')
@@ -53,21 +53,24 @@ class ChamaGroupSerializer(serializers.ModelSerializer):
 
 
 class GroupMemberSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = GroupMember
         fields = ('id', 'user', 'group', 'joined_at')
 
 
 class SavingsSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = Savings
         fields = ('id', 'amount', 'saved_at', 'group', 'user')
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = Transaction
-        fields = ('id', 'transaction_type', 'amount', 'created_at', 'group', 'user')
+        fields = ('id', 'transaction_type', 'amount', 'date', 'group', 'user')
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod

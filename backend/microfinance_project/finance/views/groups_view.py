@@ -10,13 +10,27 @@ class CreateGroupView(APIView):
     def post(self, request):
         data = request.data
         print(data)
-        data['admin'] = request.user.id
-        serializer = ChamaGroupSerializer(data = data)
+        data['admin'] = request.user.id  # Set the admin as the current user
+        serializer = ChamaGroupSerializer(data=data)
+        
         if serializer.is_valid():
+            # Save the group
             group = serializer.save()
-            GroupMember.objects.create(user = request.user, group = group)
-            return Response( serializer.data, status=status.HTTP_201_CREATED)
+            
+            # Automatically add the admin as the first group member
+            GroupMember.objects.create(user=request.user, group=group)
+            
+            # Create a default savings record for the group
+            Savings.objects.create(
+                user=request.user,
+                group=group,
+                amount=0
+            )
+            
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class JoinGroupView(APIView):
     def post(self, request):
@@ -96,7 +110,7 @@ class UserGroupsView(APIView):
             
             # Convert the groups into a list of dictionaries for the response
             group_data = [{
-                'id': group.id,
+                'groupId': group.id,
                 'name': group.name,
                 'description': group.description,
                 'admin': group.admin.username,

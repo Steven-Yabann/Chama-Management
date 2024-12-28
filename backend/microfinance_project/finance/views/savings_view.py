@@ -48,7 +48,7 @@ class SavingView(APIView):
 
     def patch(self, request, user_id=None):
         """
-        Update the amount saved for a specific user.
+        Update the amount saved for a specific user. Supports both deposit and withdrawal.
         """
         try:
             # Fetch savings record for the user
@@ -69,11 +69,21 @@ class SavingView(APIView):
             if amount <= 0:
                 return Response({'error': 'Invalid amount. Must be a positive number.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Update the savings amount
-            savings.amount += amount
-            group_id = request.data.get('group_id')
+            # Handle transaction type
             transaction_type = request.data.get('transaction_type')
-            create_transaction(user_id, amount, transaction_type, group_id)  # Call to create transaction
+            if transaction_type == 'deposit':
+                savings.amount += amount
+            elif transaction_type == 'withdrawal':
+                if amount > savings.amount:
+                    return Response({'error': 'Insufficient balance.'}, status=status.HTTP_400_BAD_REQUEST)
+                savings.amount -= amount
+            else:
+                return Response({'error': 'Invalid transaction type.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Update transactions
+            group_id = request.data.get('group_id')
+            create_transaction(user_id, amount, transaction_type, group_id)
+
             savings.save()
 
             # Serialize and return the updated savings record

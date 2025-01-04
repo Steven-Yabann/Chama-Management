@@ -10,6 +10,7 @@ import GroupDetails from './pages/GroupDetails';
 import NavBar from './components/Navbar';
 import TransactionPage from './pages/TransactionPage';
 
+
 function App() {
   return (
       <div className="container">

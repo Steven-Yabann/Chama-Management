@@ -2,14 +2,20 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () =>{
+const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
 
-    const handleLogin =async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        try{
+        setError(null);
+        setSuccessMessage(null);
+        setLoading(true);
+        try {
             const response = await axios.post('http://127.0.0.1:8000/api/auth/login/', {
                 username,
                 password,
@@ -31,11 +37,13 @@ const Login = () =>{
             localStorage.setItem('email', tokenPayload.email);
             localStorage.setItem('user_type', tokenPayload.user_type);
 
-            alert('Login succesful')
+            setSuccessMessage('Login succesful')
             navigate('/dashboard');
-        }catch (error){
+        } catch (error) {
             console.error('Login failed:', error.response?.data || error.message);
-            alert(`Login failed: ${JSON.stringify(error.response.data)}`);
+            setError(`Login failed: ${JSON.stringify(error.response.data.error)}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -46,6 +54,20 @@ const Login = () =>{
                     <div className="card">
                         <div className="card-body">
                             <h1 className="card-title text-center">Login</h1>
+                            {
+                                error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error}
+                                    </div>
+                                )
+                            }
+                            {
+                                successMessage && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {successMessage}
+                                    </div>
+                                )
+                            }
                             <form onSubmit={handleLogin}>
                                 <div className="mb-3">
                                     <label className="form-label">Username</label>

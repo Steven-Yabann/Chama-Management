@@ -22,7 +22,18 @@ const Dashboard = () => {
             setGroups(response.data);
         } catch (error) {
             console.error('Failed to fetch user groups:', error.response?.data || error.message);
-            setError('Failed to load your groups. Please try again later.');
+            if (error.response) {
+                // Check if the error response contains the specific structure for token errors
+                const errorData = error.response.data;
+                if (errorData.code === "token_not_valid" && errorData.messages?.length > 0) {
+                    const tokenErrorMessage = errorData.messages[0].message;
+                    setError(`Authentication Error: ${tokenErrorMessage}`);
+                } else {
+                    setError(`Error: ${errorData.detail || "An unknown error occurred."}`);
+                }
+            } else {    
+                setError("Network error. Please check your connection.");
+            }
         } finally {
             setLoading(false);
         }

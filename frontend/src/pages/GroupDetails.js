@@ -42,6 +42,10 @@ const GroupDetails = () => {
         fetchGroupDetails();
     }, [groupId]);
 
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="container mt-5">
             <button

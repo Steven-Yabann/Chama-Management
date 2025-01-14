@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from decimal import Decimal
+from dateutil.relativedelta import relativedelta
 
 # Custom User model
 class User(AbstractUser):
@@ -18,6 +20,7 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+# Chama group Model
 class ChamaGroup(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=  100)
@@ -34,6 +37,7 @@ class ChamaGroup(models.Model):
     def __str__(self):
         return self.name
        
+# Chama group member model
 class GroupMember(models.Model):
     user = models.ForeignKey(User,  on_delete=models.CASCADE)
     group = models.ForeignKey(ChamaGroup, on_delete=models.CASCADE)
@@ -68,5 +72,38 @@ class Transaction(models.Model):
         return f'{self.transaction_type} - {self.amount} - {self.user.username}'
 
 
+# Loan model
+class Loan(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='loans')
+    group = models.ForeignKey('ChamaGroup', on_delete=models.CASCADE, related_name='loans')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=1.0)  # Default 1% interest
+    term_in_months = models.PositiveIntegerField()  # Loan term in months
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def calculate_monthly_payment(self):
+        """
+        Calculates the monthly payment using the amortization formula.
+        """
+        principal = Decimal(self.amount)
+        rate = Decimal(self.interest_rate) / (100 * 12)
+        months = self.term_in_months
+
+        if rate > 0:
+            monthly_payment = principal * rate * (1 + rate)**months / ((1 + rate)**months - 1)
+        else:
+            monthly_payment = principal / months
+
+        return round(monthly_payment, 2)
+
+    def __str__(self):
+        return f"Loan {self.id} - {self.user.username}"
 

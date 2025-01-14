@@ -41,7 +41,7 @@ const Login = () => {
             navigate('/dashboard');
         } catch (error) {
             console.error('Login failed:', error.response?.data || error.message);
-            setError(`Login failed: ${JSON.stringify(error.response.data.error)}`);
+            setError(`Login failed: ${error.response.data.error}`);
         } finally {
             setLoading(false);
         }

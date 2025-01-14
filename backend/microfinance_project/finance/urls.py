@@ -6,6 +6,7 @@ from .views.login_view import LoginView
 from .views.register_view import RegisterView
 from .views.logout_view import LogoutView
 from .views.groups_view import CreateGroupView, JoinGroupView, GroupMembersView, GroupDetailsView, UserGroupsView
+from .views.loan_view import LoanView, LoanRepaymentView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import CustomTokenObtainPairSerializer
 
@@ -31,4 +32,7 @@ urlpatterns = [
     path('groups/join/', JoinGroupView.as_view(), name='join_group'),
     path('groups/<int:group_id>/details/', GroupDetailsView.as_view(), name='group_details'),
     path('groups/user/', UserGroupsView.as_view(), name='user_groups'),
+
+    path('loans/', LoanView.as_view(), name='loan'),
+    path('loans/<int:loan_id>/repay/', LoanRepaymentView.as_view(), name='loan_repayment'),
 ]

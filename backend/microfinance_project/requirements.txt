@@ -6,3 +6,4 @@ typing_extensions==4.12.2
 djangorestframework==3.15.2
 djangorestframework-simplejwt==5.3.1
 psycopg2==2.9.10
+python-dateutil==2.9.0

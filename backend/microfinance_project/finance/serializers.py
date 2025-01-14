@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Savings, Transaction, GroupMember, ChamaGroup
+from .models import User, Savings, Transaction, GroupMember, ChamaGroup, Loan
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -84,3 +84,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_type'] = user.user_type
 
         return token
+    
+class LoanSerializer(serializers.ModelSerializer):
+    monthly_payment = serializers.SerializerMethodField()
+    # user = UserSerializer()
+    class Meta:
+        model = Loan
+        fields = ['id', 'user', 'group', 'amount', 'interest_rate', 'term_in_months', 'status', 'created_at', 'balance', 'monthly_payment']
+
+    def get_monthly_payment(self, obj):
+        return obj.calculate_monthly_payment()
